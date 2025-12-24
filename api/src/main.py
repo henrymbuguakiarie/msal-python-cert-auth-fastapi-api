@@ -18,6 +18,7 @@ from .middleware import (
     RequestLoggingMiddleware,
     SecurityHeadersMiddleware,
 )
+from .rate_limit import RateLimitMiddleware
 from .routes import posts_router, profile_router, users_router
 
 # Configure logging
@@ -75,6 +76,13 @@ app.add_middleware(
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(CorrelationIdMiddleware)
+
+# Add rate limiting (configure per environment)
+if settings.environment == "production":
+    app.add_middleware(RateLimitMiddleware, default_rate=100, default_per=60)
+else:
+    # More lenient for development
+    app.add_middleware(RateLimitMiddleware, default_rate=1000, default_per=60)
 
 
 # Exception handlers
