@@ -1,4 +1,5 @@
 """Pytest configuration and shared fixtures."""
+
 import os
 from typing import Any, Generator
 from unittest.mock import Mock
@@ -35,15 +36,15 @@ def session_fixture(test_engine) -> Generator[Session, None, None]:
 @pytest.fixture(name="client")
 def client_fixture(session: Session) -> Generator[TestClient, None, None]:
     """Create test client with database session override."""
-    
+
     def get_session_override():
         return session
-    
+
     app.dependency_overrides[get_session] = get_session_override
-    
+
     with TestClient(app) as test_client:
         yield test_client
-    
+
     app.dependency_overrides.clear()
 
 
@@ -118,18 +119,20 @@ def reset_environment():
     """Reset environment variables before each test."""
     # Store original env vars
     original_env = os.environ.copy()
-    
+
     # Set test environment variables
-    os.environ.update({
-        "TENANT_ID": "test-tenant-id-123e4567-e89b-12d3-a456-426614174000",
-        "API_APP_ID_URI": "api://test-api-client-id",
-        "REQUIRED_SCOPE": "access_as_user",
-        "DATABASE_URL": "sqlite:///:memory:",
-        "ENVIRONMENT": "development",
-    })
-    
+    os.environ.update(
+        {
+            "TENANT_ID": "test-tenant-id-123e4567-e89b-12d3-a456-426614174000",
+            "API_APP_ID_URI": "api://test-api-client-id",
+            "REQUIRED_SCOPE": "access_as_user",
+            "DATABASE_URL": "sqlite:///:memory:",
+            "ENVIRONMENT": "development",
+        }
+    )
+
     yield
-    
+
     # Restore original env vars
     os.environ.clear()
     os.environ.update(original_env)

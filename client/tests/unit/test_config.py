@@ -22,7 +22,10 @@ class TestSettings:
         # Assert
         assert settings.tenant_id == "12345678-1234-1234-1234-123456789012"
         assert settings.client_id == "87654321-4321-4321-4321-210987654321"
-        assert settings.client_cert_thumbprint == "1234567890abcdef1234567890abcdef12345678"
+        assert (
+            settings.client_cert_thumbprint
+            == "1234567890abcdef1234567890abcdef12345678"
+        )
         assert settings.redirect_uri == "http://localhost:5000/callback"
         assert settings.api_scope == "api://test-api-id/access_as_user"
         assert settings.api_base_url == "http://localhost:8000"
@@ -38,7 +41,10 @@ class TestSettings:
         authority = settings.authority
 
         # Assert
-        assert authority == "https://login.microsoftonline.com/12345678-1234-1234-1234-123456789012"
+        assert (
+            authority
+            == "https://login.microsoftonline.com/12345678-1234-1234-1234-123456789012"
+        )
 
     def test_scope_list_property(self, mock_settings: Settings) -> None:
         """Test scope list generation."""
@@ -177,13 +183,13 @@ class TestGetSettings:
         # Arrange & Act
         # Clear the cache first
         get_settings.cache_clear()
-        
+
         # Verify the function is an lru_cache
         assert hasattr(get_settings, "cache_info")
-        
+
         # Get cache info
         info_before = get_settings.cache_info()
-        
+
         # Assert - lru_cache default maxsize is 128 (not unlimited)
         assert info_before.maxsize == 128
         assert info_before.currsize == 0  # No calls yet

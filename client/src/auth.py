@@ -25,13 +25,13 @@ logger = logging.getLogger(__name__)
 
 class MSALAuthClient:
     """MSAL authentication client for certificate-based auth.
-    
+
     This class handles:
     - Loading X.509 certificates
     - Building authorization URLs
     - Acquiring tokens via authorization code flow
     - Token caching in memory
-    
+
     Attributes:
         settings: Application settings
         _msal_app: MSAL ConfidentialClientApplication instance
@@ -40,10 +40,10 @@ class MSALAuthClient:
 
     def __init__(self, settings: Settings) -> None:
         """Initialize the MSAL authentication client.
-        
+
         Args:
             settings: Application settings containing auth configuration
-            
+
         Raises:
             CertificateError: If certificate loading fails
         """
@@ -53,19 +53,19 @@ class MSALAuthClient:
 
     def _load_certificate(self) -> dict[str, Any]:
         """Load X.509 certificate for authentication.
-        
+
         Returns:
             Certificate dictionary for MSAL
-            
+
         Raises:
             CertificateError: If certificate loading fails
         """
         cert_path = Path(self.settings.client_cert_path)
-        
+
         try:
             with open(cert_path, "rb") as cert_file:
                 cert_data = cert_file.read()
-            
+
             # MSAL expects PEM format or PFX
             # For PEM files (most common), we load as string
             if cert_path.suffix.lower() == ".pem":
@@ -80,10 +80,10 @@ class MSALAuthClient:
                     "private_key": cert_data,
                     "thumbprint": self.settings.client_cert_thumbprint,
                 }
-            
+
             logger.info(f"Successfully loaded certificate from {cert_path}")
             return cert_dict
-            
+
         except FileNotFoundError as e:
             logger.error(f"Certificate file not found: {cert_path}")
             raise CertificateError(f"Certificate file not found: {cert_path}") from e
@@ -93,25 +93,25 @@ class MSALAuthClient:
 
     def _build_msal_app(self) -> msal.ConfidentialClientApplication:
         """Build MSAL ConfidentialClientApplication with certificate.
-        
+
         Returns:
             Configured MSAL application instance
-            
+
         Raises:
             AuthenticationError: If MSAL app creation fails
         """
         try:
             cert_dict = self._load_certificate()
-            
+
             app = msal.ConfidentialClientApplication(
                 client_id=self.settings.client_id,
                 client_credential=cert_dict,
                 authority=self.settings.authority,
             )
-            
+
             logger.info("Successfully created MSAL application")
             return app
-            
+
         except CertificateError:
             raise
         except Exception as e:
@@ -120,10 +120,10 @@ class MSALAuthClient:
 
     def get_authorization_url(self, state: str | None = None) -> tuple[str, str]:
         """Build authorization URL for OAuth 2.0 Authorization Code Flow.
-        
+
         Args:
             state: Optional state parameter for CSRF protection
-            
+
         Returns:
             Tuple of (authorization_url, state)
         """
@@ -132,11 +132,11 @@ class MSALAuthClient:
             state=state,
             redirect_uri=self.settings.redirect_uri,
         )
-        
+
         # MSAL returns the URL directly in this case
         # State is passed through if provided
         actual_state = state or "default_state"
-        
+
         logger.info("Generated authorization URL")
         return auth_url, actual_state
 
@@ -146,14 +146,14 @@ class MSALAuthClient:
         scopes: list[str] | None = None,
     ) -> dict[str, Any]:
         """Exchange authorization code for access token.
-        
+
         Args:
             code: Authorization code from callback
             scopes: Optional list of scopes (defaults to configured API scope)
-            
+
         Returns:
             Token response dictionary containing access_token, id_token, etc.
-            
+
         Raises:
             TokenAcquisitionError: If token acquisition fails
         """
@@ -166,20 +166,20 @@ class MSALAuthClient:
                 scopes=scopes,
                 redirect_uri=self.settings.redirect_uri,
             )
-            
+
             if "error" in result:
                 error_description = result.get("error_description", "Unknown error")
                 logger.error(f"Token acquisition failed: {error_description}")
                 raise TokenAcquisitionError(
                     f"Failed to acquire token: {error_description}"
                 )
-            
+
             # Cache the token
             self._cache_token(result)
-            
+
             logger.info("Successfully acquired access token")
             return result
-            
+
         except TokenAcquisitionError:
             raise
         except Exception as e:
@@ -194,11 +194,11 @@ class MSALAuthClient:
         account: dict[str, Any] | None = None,
     ) -> dict[str, Any] | None:
         """Acquire token silently from cache or refresh token.
-        
+
         Args:
             scopes: Optional list of scopes (defaults to configured API scope)
             account: Optional account hint from previous authentication
-            
+
         Returns:
             Token response dictionary or None if silent acquisition fails
         """
@@ -206,7 +206,7 @@ class MSALAuthClient:
             scopes = self.settings.scope_list
 
         accounts = self._msal_app.get_accounts()
-        
+
         if not accounts:
             logger.debug("No accounts in cache for silent token acquisition")
             return None
@@ -223,13 +223,13 @@ class MSALAuthClient:
             logger.info("Successfully acquired token silently")
             self._cache_token(result)
             return result
-        
+
         logger.debug("Silent token acquisition returned no token")
         return None
 
     def _cache_token(self, token_response: dict[str, Any]) -> None:
         """Cache token response in memory.
-        
+
         Args:
             token_response: Token response from MSAL
         """
@@ -239,7 +239,7 @@ class MSALAuthClient:
 
     def get_cached_token(self) -> dict[str, Any] | None:
         """Retrieve cached token from memory.
-        
+
         Returns:
             Cached token response or None
         """
@@ -247,7 +247,7 @@ class MSALAuthClient:
 
     def get_accounts(self) -> list[dict[str, Any]]:
         """Get all accounts from MSAL cache.
-        
+
         Returns:
             List of account dictionaries
         """
@@ -260,12 +260,12 @@ class MSALAuthClient:
 
     def get_id_token_claims(self) -> dict[str, Any] | None:
         """Extract claims from cached ID token.
-        
+
         Returns:
             Dictionary of ID token claims or None
         """
         cached_token = self.get_cached_token()
         if not cached_token or "id_token_claims" not in cached_token:
             return None
-        
+
         return cached_token["id_token_claims"]

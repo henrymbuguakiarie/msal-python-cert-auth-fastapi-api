@@ -105,7 +105,9 @@ class TestMSALAuthClient:
         """Test successful token acquisition by authorization code."""
         # Arrange
         mock_app = MagicMock()
-        mock_app.acquire_token_by_authorization_code.return_value = sample_token_response
+        mock_app.acquire_token_by_authorization_code.return_value = (
+            sample_token_response
+        )
         mock_msal_class.return_value = mock_app
 
         client = MSALAuthClient(mock_settings)

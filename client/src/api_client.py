@@ -35,13 +35,13 @@ logger = logging.getLogger(__name__)
 
 class APIClient:
     """Client for calling the downstream FastAPI.
-    
+
     This class handles:
     - Bearer token injection
     - Request/response serialization
     - Error handling and logging
     - Type-safe API calls
-    
+
     Attributes:
         settings: Application settings
         base_url: Base URL of the API
@@ -49,7 +49,7 @@ class APIClient:
 
     def __init__(self, settings: Settings) -> None:
         """Initialize the API client.
-        
+
         Args:
             settings: Application settings
         """
@@ -58,10 +58,10 @@ class APIClient:
 
     def _get_headers(self, access_token: str) -> dict[str, str]:
         """Build HTTP headers with Bearer token.
-        
+
         Args:
             access_token: JWT access token
-            
+
         Returns:
             Dictionary of HTTP headers
         """
@@ -73,13 +73,13 @@ class APIClient:
 
     def _handle_response(self, response: requests.Response) -> dict[str, Any]:
         """Handle API response and raise appropriate exceptions.
-        
+
         Args:
             response: HTTP response object
-            
+
         Returns:
             Response JSON data
-            
+
         Raises:
             UnauthorizedError: For 401 responses
             ForbiddenError: For 403 responses
@@ -111,9 +111,7 @@ class APIClient:
             raise BadRequestError(response_data.get("detail", "Invalid request"))
         elif response.status_code >= 500:
             logger.error(f"Server error: {response_data}")
-            raise APIServerError(
-                response_data.get("detail", "Internal server error")
-            )
+            raise APIServerError(response_data.get("detail", "Internal server error"))
         elif not response.ok:
             logger.error(f"API error: {response.status_code} - {response_data}")
             raise APIClientError(
@@ -124,13 +122,13 @@ class APIClient:
 
     def get_profile(self, access_token: str) -> ProfileResponse:
         """Get current user profile.
-        
+
         Args:
             access_token: Bearer token
-            
+
         Returns:
             User profile data
-            
+
         Raises:
             APIClientError: If the request fails
         """
@@ -150,15 +148,15 @@ class APIClient:
         limit: int = 10,
     ) -> PaginatedBlogPosts:
         """List blog posts with pagination.
-        
+
         Args:
             access_token: JWT access token
             skip: Number of posts to skip
             limit: Maximum number of posts to return
-            
+
         Returns:
             Paginated blog posts
-            
+
         Raises:
             APIClientError: If the request fails
         """
@@ -173,23 +171,20 @@ class APIClient:
         # API returns a list, wrap it in pagination structure
         if isinstance(data, list):
             return PaginatedBlogPosts(
-                posts=data,
-                total=len(data),
-                skip=skip,
-                limit=limit
+                posts=data, total=len(data), skip=skip, limit=limit
             )
         return PaginatedBlogPosts(**data)
 
     def get_post(self, access_token: str, post_id: int) -> BlogPostWithAuthor:
         """Get a single blog post by ID.
-        
+
         Args:
             access_token: JWT access token
             post_id: Blog post ID
-            
+
         Returns:
             Blog post with author information
-            
+
         Raises:
             NotFoundError: If post doesn't exist
             APIClientError: If the request fails
@@ -209,14 +204,14 @@ class APIClient:
         post_data: BlogPostCreate,
     ) -> BlogPostResponse:
         """Create a new blog post.
-        
+
         Args:
             access_token: JWT access token
             post_data: Blog post creation data
-            
+
         Returns:
             Created blog post
-            
+
         Raises:
             BadRequestError: If validation fails
             APIClientError: If the request fails
@@ -238,15 +233,15 @@ class APIClient:
         post_data: BlogPostUpdate,
     ) -> BlogPostResponse:
         """Update an existing blog post.
-        
+
         Args:
             access_token: JWT access token
             post_id: Blog post ID
             post_data: Updated blog post data
-            
+
         Returns:
             Updated blog post
-            
+
         Raises:
             NotFoundError: If post doesn't exist
             ForbiddenError: If user doesn't own the post
@@ -265,14 +260,14 @@ class APIClient:
 
     def delete_post(self, access_token: str, post_id: int) -> dict[str, str]:
         """Delete a blog post.
-        
+
         Args:
             access_token: JWT access token
             post_id: Blog post ID
-            
+
         Returns:
             Success message dictionary
-            
+
         Raises:
             NotFoundError: If post doesn't exist
             ForbiddenError: If user doesn't own the post

@@ -1,4 +1,5 @@
 """FastAPI application entry point."""
+
 import logging
 import sys
 from contextlib import asynccontextmanager
@@ -35,19 +36,19 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager.
-    
+
     Handles startup and shutdown events.
     """
     # Startup
     logger.info("Starting Blog API application")
     logger.info(f"Environment: {settings.environment}")
     logger.info(f"API Version: {settings.api_version}")
-    
+
     # Create database tables
     create_db_and_tables()
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down Blog API application")
 
@@ -89,11 +90,11 @@ else:
 @app.exception_handler(APIException)
 async def api_exception_handler(request: Request, exc: APIException) -> JSONResponse:
     """Handle custom API exceptions.
-    
+
     Args:
         request: Incoming request
         exc: API exception
-        
+
     Returns:
         JSON error response
     """
@@ -113,11 +114,11 @@ async def validation_exception_handler(
     exc: RequestValidationError,
 ) -> JSONResponse:
     """Handle request validation errors.
-    
+
     Args:
         request: Incoming request
         exc: Validation error
-        
+
     Returns:
         JSON error response
     """
@@ -134,11 +135,11 @@ async def validation_exception_handler(
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle unexpected exceptions.
-    
+
     Args:
         request: Incoming request
         exc: Exception
-        
+
     Returns:
         JSON error response
     """
@@ -156,7 +157,7 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
 @app.get("/health", tags=["Health"])
 async def health_check_simple() -> dict[str, str]:
     """Simple health check endpoint (backward compatible).
-    
+
     Returns:
         Health status
     """
@@ -173,7 +174,7 @@ app.include_router(posts_router, prefix=api_prefix)
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     uvicorn.run(
         "src.main:app",
         host="0.0.0.0",

@@ -54,10 +54,10 @@ api_client = APIClient(settings)
 
 def login_required(f: Callable) -> Callable:
     """Decorator to require authentication for routes.
-    
+
     Args:
         f: Route function to wrap
-        
+
     Returns:
         Wrapped function that checks for authentication
     """
@@ -74,7 +74,7 @@ def login_required(f: Callable) -> Callable:
 
 def get_access_token() -> str | None:
     """Get valid access token from session or refresh if needed.
-    
+
     Returns:
         Access token string or None if not available
     """
@@ -94,7 +94,7 @@ def get_access_token() -> str | None:
 @app.route("/")
 def index() -> str:
     """Home page route.
-    
+
     Returns:
         Rendered HTML template
     """
@@ -209,7 +209,7 @@ def index() -> str:
 @app.route("/login")
 def login() -> Any:
     """Initiate OAuth authentication flow.
-    
+
     Returns:
         Redirect to Microsoft authorization endpoint
     """
@@ -227,7 +227,7 @@ def login() -> Any:
 @app.route("/callback")
 def callback() -> Any:
     """Handle OAuth callback from Microsoft.
-    
+
     Returns:
         Redirect to home page or error page
     """
@@ -259,7 +259,7 @@ def callback() -> Any:
 
         # Store token and user info in session
         session["access_token"] = result["access_token"]
-        
+
         # Extract user info from ID token claims
         id_token_claims = result.get("id_token_claims", {})
         session["user"] = {
@@ -281,15 +281,15 @@ def callback() -> Any:
 @app.route("/logout")
 def logout() -> Any:
     """Sign out the current user.
-    
+
     Returns:
         Redirect to home page
     """
     user_name = session.get("user", {}).get("name", "User")
-    
+
     # Clear session
     session.clear()
-    
+
     # Clear MSAL cache
     auth_client.clear_cache()
 
@@ -302,7 +302,7 @@ def logout() -> Any:
 @login_required
 def profile() -> str:
     """Display user profile from API.
-    
+
     Returns:
         Rendered HTML template
     """
@@ -408,7 +408,7 @@ def profile() -> str:
 @login_required
 def list_posts() -> str:
     """List all blog posts.
-    
+
     Returns:
         Rendered HTML template
     """
@@ -567,7 +567,9 @@ def list_posts() -> str:
         </html>
         """
 
-        return render_template_string(template, posts_data=posts_data, skip=skip, limit=limit, max=max)
+        return render_template_string(
+            template, posts_data=posts_data, skip=skip, limit=limit, max=max
+        )
 
     except UnauthorizedError:
         flash("Session expired. Please sign in again.", "warning")
@@ -582,10 +584,10 @@ def list_posts() -> str:
 @login_required
 def view_post(post_id: int) -> str:
     """View a single blog post.
-    
+
     Args:
         post_id: Blog post ID
-        
+
     Returns:
         Rendered HTML template
     """
@@ -596,7 +598,7 @@ def view_post(post_id: int) -> str:
 
     try:
         post = api_client.get_post(access_token, post_id)
-        
+
         # Check if current user is the author
         current_user_oid = session.get("user", {}).get("oid", "")
         is_author = post.author and post.author.oid == current_user_oid
@@ -727,7 +729,7 @@ def view_post(post_id: int) -> str:
 @login_required
 def create_post_form() -> Any:
     """Create a new blog post.
-    
+
     Returns:
         Rendered HTML template or redirect
     """
@@ -854,10 +856,10 @@ def create_post_form() -> Any:
 @login_required
 def edit_post_form(post_id: int) -> Any:
     """Edit an existing blog post.
-    
+
     Args:
         post_id: Blog post ID
-        
+
     Returns:
         Rendered HTML template or redirect
     """
@@ -1009,10 +1011,10 @@ def edit_post_form(post_id: int) -> Any:
 @login_required
 def delete_post(post_id: int) -> Any:
     """Delete a blog post.
-    
+
     Args:
         post_id: Blog post ID
-        
+
     Returns:
         Redirect to posts list
     """
