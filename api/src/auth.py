@@ -62,7 +62,7 @@ class JWTValidator:
             return self._jwks_cache
         except httpx.HTTPError as e:
             logger.error(f"Failed to fetch JWKS: {e}")
-            raise TokenValidationError(f"Unable to fetch JWKS: {e}")
+            raise TokenValidationError(f"Unable to fetch JWKS: {e}") from e
 
     def _get_signing_key(self, token: str, jwks: dict[str, Any]) -> dict[str, Any]:
         """Extract signing key from JWKS based on token header.
@@ -94,7 +94,7 @@ class JWTValidator:
 
         except JWTError as e:
             logger.error(f"Error extracting signing key: {e}")
-            raise TokenValidationError(f"Invalid token header: {e}")
+            raise TokenValidationError(f"Invalid token header: {e}") from e
 
     async def validate_token(self, token: str) -> dict[str, Any]:
         """Validate JWT token and extract claims.
@@ -167,10 +167,10 @@ class JWTValidator:
 
         except JWTError as e:
             logger.warning(f"JWT validation failed: {e}")
-            raise TokenValidationError(str(e))
+            raise TokenValidationError(str(e)) from e
         except Exception as e:
             logger.error(f"Unexpected error during token validation: {e}")
-            raise TokenValidationError(f"Token validation error: {e}")
+            raise TokenValidationError(f"Token validation error: {e}") from e
 
 
 async def get_current_user(
@@ -205,14 +205,14 @@ async def get_current_user(
             status_code=401,
             detail=e.message,
             headers={"WWW-Authenticate": f'Bearer error="{e.details.get("reason")}"'},
-        )
+        ) from e
     except Exception as e:
         logger.error(f"Authentication error: {e}")
         raise HTTPException(
             status_code=401,
             detail="Authentication failed",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
 
 
 def get_user_oid(claims: dict[str, Any] = Depends(get_current_user)) -> str:

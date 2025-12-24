@@ -118,7 +118,7 @@ async def create_post(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create post",
-        )
+        ) from e
 
 
 @posts_router.get(
@@ -226,7 +226,7 @@ async def get_post(
         else:
             raise ResourceNotFoundError("Author", post.author_id)
     except ResourceNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message) from e
 
 
 @posts_router.put(
@@ -260,9 +260,9 @@ async def update_post(
         post = service.update_post(post_id, post_data, user_oid)
         return BlogPostResponse.model_validate(post)
     except ResourceNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message) from e
     except AuthorizationError as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=e.message)
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=e.message) from e
 
 
 @posts_router.delete(
@@ -290,6 +290,6 @@ async def delete_post(
         service = BlogPostService(session)
         service.delete_post(post_id, user_oid)
     except ResourceNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message) from e
     except AuthorizationError as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=e.message)
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=e.message) from e
