@@ -12,6 +12,12 @@ from fastapi.responses import JSONResponse
 from .config import get_settings
 from .database import create_db_and_tables
 from .exceptions import APIException
+from .health import router as health_router
+from .middleware import (
+    CorrelationIdMiddleware,
+    RequestLoggingMiddleware,
+    SecurityHeadersMiddleware,
+)
 from .routes import posts_router, profile_router, users_router
 
 # Configure logging
@@ -64,6 +70,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add custom middleware (order matters - last added is executed first)
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(CorrelationIdMiddleware)
 
 
 # Exception handlers
@@ -133,10 +144,10 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
     )
 
 
-# Health check endpoint
+# Health check endpoint (simple, for backward compatibility)
 @app.get("/health", tags=["Health"])
-async def health_check() -> dict[str, str]:
-    """Health check endpoint.
+async def health_check_simple() -> dict[str, str]:
+    """Simple health check endpoint (backward compatible).
     
     Returns:
         Health status
@@ -145,6 +156,7 @@ async def health_check() -> dict[str, str]:
 
 
 # Register routers
+app.include_router(health_router)  # Detailed health checks
 api_prefix = f"/{settings.api_version}"
 app.include_router(profile_router, prefix=api_prefix)
 app.include_router(users_router, prefix=api_prefix)
