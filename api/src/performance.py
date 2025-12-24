@@ -4,7 +4,8 @@ import functools
 import logging
 import time
 from collections import defaultdict
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +115,7 @@ def monitor_performance(operation_name: str | None = None):
             try:
                 result = await func(*args, **kwargs)
                 return result
-            except Exception as e:
+            except Exception:
                 success = False
                 raise
             finally:
@@ -136,7 +137,7 @@ def monitor_performance(operation_name: str | None = None):
             try:
                 result = func(*args, **kwargs)
                 return result
-            except Exception as e:
+            except Exception:
                 success = False
                 raise
             finally:

@@ -1,7 +1,6 @@
 """Pagination utilities for API responses."""
 
-from typing import Any, Generic, TypeVar
-from urllib.parse import urlencode
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel, Field
 

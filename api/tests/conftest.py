@@ -1,8 +1,8 @@
 """Pytest configuration and shared fixtures."""
 
 import os
-from typing import Any, Generator
-from unittest.mock import Mock
+from collections.abc import Generator
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient

@@ -1,7 +1,5 @@
 """Unit tests for configuration module."""
 
-import os
-
 import pytest
 from pydantic import ValidationError
 

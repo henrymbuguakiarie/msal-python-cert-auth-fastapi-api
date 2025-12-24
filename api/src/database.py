@@ -1,7 +1,7 @@
 """Database connection and session management."""
 
 import logging
-from typing import Generator
+from collections.abc import Generator
 
 from sqlmodel import Session, SQLModel, create_engine
 

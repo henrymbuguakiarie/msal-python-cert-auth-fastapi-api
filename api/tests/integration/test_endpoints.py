@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 from fastapi import status
 
-from src.models import BlogPost, User
+from src.models import BlogPost
 
 
 @pytest.fixture(autouse=True)

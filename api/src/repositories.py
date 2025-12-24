@@ -6,7 +6,6 @@ isolating business logic from data access details.
 
 from datetime import datetime
 
-from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
 from .exceptions import ResourceNotFoundError

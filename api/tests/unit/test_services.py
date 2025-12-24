@@ -3,7 +3,7 @@
 import pytest
 
 from src.exceptions import AuthorizationError, ResourceNotFoundError
-from src.models import BlogPostCreate, BlogPostUpdate, User
+from src.models import BlogPostCreate, BlogPostUpdate
 from src.repositories import UserRepository
 from src.services import BlogPostService, UserService
 

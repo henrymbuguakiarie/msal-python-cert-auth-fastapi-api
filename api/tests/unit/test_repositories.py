@@ -5,7 +5,6 @@ import time
 import pytest
 
 from src.exceptions import ResourceNotFoundError
-from src.models import BlogPost, User
 from src.repositories import BlogPostRepository, UserRepository
 
 
