@@ -53,9 +53,7 @@ class HealthCheck:
                 return {
                     "status": "healthy",
                     "message": "Database is accessible",
-                    "database_url": self.settings.database_url.split("@")[
-                        -1
-                    ],  # Hide credentials
+                    "database_url": self.settings.database_url.split("@")[-1],  # Hide credentials
                 }
         except Exception as e:
             logger.error(f"Database health check failed: {e}")

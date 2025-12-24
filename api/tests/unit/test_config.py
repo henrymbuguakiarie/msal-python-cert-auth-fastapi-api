@@ -77,8 +77,7 @@ class TestSettings:
         )
 
         expected_issuer = (
-            "https://login.microsoftonline.com/"
-            "12345678-1234-1234-1234-123456789012/v2.0"
+            "https://login.microsoftonline.com/" "12345678-1234-1234-1234-123456789012/v2.0"
         )
         assert settings.token_issuer == expected_issuer
 

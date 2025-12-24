@@ -15,9 +15,7 @@ class TestUserService:
         """Test creating a new user when none exists."""
         service = UserService(session)
 
-        user, created = service.get_or_create_user(
-            oid="new-user-oid", display_name="New User"
-        )
+        user, created = service.get_or_create_user(oid="new-user-oid", display_name="New User")
 
         assert created is True
         assert user.oid == "new-user-oid"
@@ -27,9 +25,7 @@ class TestUserService:
         """Test returning existing user instead of creating duplicate."""
         service = UserService(session)
 
-        user, created = service.get_or_create_user(
-            oid=test_user.oid, display_name="Different Name"
-        )
+        user, created = service.get_or_create_user(oid=test_user.oid, display_name="Different Name")
 
         assert created is False
         assert user.id == test_user.id
@@ -152,9 +148,7 @@ class TestBlogPostService:
         # Content should remain unchanged
         assert updated_post.content == test_post.content
 
-    def test_update_post_raises_authorization_error(
-        self, session, test_post, another_user
-    ):
+    def test_update_post_raises_authorization_error(self, session, test_post, another_user):
         """Test that update_post raises authorization error for non-owner."""
         service = BlogPostService(session)
 
@@ -175,9 +169,7 @@ class TestBlogPostService:
         with pytest.raises(ResourceNotFoundError):
             service.get_post(test_post.id)
 
-    def test_delete_post_raises_authorization_error(
-        self, session, test_post, another_user
-    ):
+    def test_delete_post_raises_authorization_error(self, session, test_post, another_user):
         """Test that delete_post raises authorization error for non-owner."""
         service = BlogPostService(session)
 

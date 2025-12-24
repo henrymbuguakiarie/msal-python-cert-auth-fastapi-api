@@ -90,9 +90,7 @@ class JWTValidator:
                 if key.get("kid") == kid:
                     return key
 
-            raise TokenValidationError(
-                f"Signing key with kid '{kid}' not found in JWKS"
-            )
+            raise TokenValidationError(f"Signing key with kid '{kid}' not found in JWKS")
 
         except JWTError as e:
             logger.error(f"Error extracting signing key: {e}")
@@ -231,7 +229,5 @@ def get_user_oid(claims: dict[str, Any] = Depends(get_current_user)) -> str:
     """
     oid = claims.get("oid")
     if not oid:
-        raise HTTPException(
-            status_code=401, detail="Token missing required 'oid' claim"
-        )
+        raise HTTPException(status_code=401, detail="Token missing required 'oid' claim")
     return oid

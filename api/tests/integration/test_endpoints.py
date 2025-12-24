@@ -119,9 +119,7 @@ class TestBlogPostEndpoints:
         """Test post listing with pagination."""
         # Create multiple posts
         for i in range(5):
-            post = BlogPost(
-                title=f"Post {i}", content=f"Content {i}", author_id=test_user.id
-            )
+            post = BlogPost(title=f"Post {i}", content=f"Content {i}", author_id=test_user.id)
             session.add(post)
         session.commit()
 
@@ -151,9 +149,7 @@ class TestBlogPostEndpoints:
         """Test updating a post as the owner."""
         update_data = {"title": "Updated Title", "content": "Updated Content"}
 
-        response = client.put(
-            f"/v1/posts/{test_post.id}", json=update_data, headers=auth_headers
-        )
+        response = client.put(f"/v1/posts/{test_post.id}", json=update_data, headers=auth_headers)
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -164,9 +160,7 @@ class TestBlogPostEndpoints:
         """Test partial update of a post."""
         update_data = {"title": "Only Title Changed"}
 
-        response = client.put(
-            f"/v1/posts/{test_post.id}", json=update_data, headers=auth_headers
-        )
+        response = client.put(f"/v1/posts/{test_post.id}", json=update_data, headers=auth_headers)
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -174,23 +168,17 @@ class TestBlogPostEndpoints:
         # Content should remain unchanged
         assert data["content"] == test_post.content
 
-    def test_update_post_unauthorized(
-        self, client, auth_headers, session, another_user
-    ):
+    def test_update_post_unauthorized(self, client, auth_headers, session, another_user):
         """Test updating post by non-owner returns 403."""
         # Create post owned by another user
-        post = BlogPost(
-            title="Another User's Post", content="Content", author_id=another_user.id
-        )
+        post = BlogPost(title="Another User's Post", content="Content", author_id=another_user.id)
         session.add(post)
         session.commit()
         session.refresh(post)
 
         update_data = {"title": "Unauthorized Update"}
 
-        response = client.put(
-            f"/v1/posts/{post.id}", json=update_data, headers=auth_headers
-        )
+        response = client.put(f"/v1/posts/{post.id}", json=update_data, headers=auth_headers)
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -204,14 +192,10 @@ class TestBlogPostEndpoints:
         get_response = client.get(f"/v1/posts/{test_post.id}", headers=auth_headers)
         assert get_response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_delete_post_unauthorized(
-        self, client, auth_headers, session, another_user
-    ):
+    def test_delete_post_unauthorized(self, client, auth_headers, session, another_user):
         """Test deleting post by non-owner returns 403."""
         # Create post owned by another user
-        post = BlogPost(
-            title="Another User's Post", content="Content", author_id=another_user.id
-        )
+        post = BlogPost(title="Another User's Post", content="Content", author_id=another_user.id)
         session.add(post)
         session.commit()
         session.refresh(post)

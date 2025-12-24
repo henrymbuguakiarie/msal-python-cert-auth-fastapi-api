@@ -63,9 +63,7 @@ class UserRepository:
         self.session.refresh(user)
         return user
 
-    def get_or_create(
-        self, oid: str, display_name: str | None = None
-    ) -> tuple[User, bool]:
+    def get_or_create(self, oid: str, display_name: str | None = None) -> tuple[User, bool]:
         """Get existing user or create new one.
 
         Args:
@@ -135,9 +133,7 @@ class BlogPostRepository:
         statement = select(BlogPost).offset(skip).limit(limit)
         return list(self.session.exec(statement).all())
 
-    def list_by_author(
-        self, author_id: int, skip: int = 0, limit: int = 100
-    ) -> list[BlogPost]:
+    def list_by_author(self, author_id: int, skip: int = 0, limit: int = 100) -> list[BlogPost]:
         """List blog posts by author with pagination.
 
         Args:
@@ -149,10 +145,7 @@ class BlogPostRepository:
             List of blog posts
         """
         statement = (
-            select(BlogPost)
-            .where(BlogPost.author_id == author_id)
-            .offset(skip)
-            .limit(limit)
+            select(BlogPost).where(BlogPost.author_id == author_id).offset(skip).limit(limit)
         )
         return list(self.session.exec(statement).all())
 

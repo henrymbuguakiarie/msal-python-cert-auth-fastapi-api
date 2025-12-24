@@ -122,9 +122,7 @@ class TestBlogPostRepository:
 
         # Create multiple posts
         for i in range(3):
-            repo.create(
-                title=f"Post {i}", content=f"Content {i}", author_id=test_user.id
-            )
+            repo.create(title=f"Post {i}", content=f"Content {i}", author_id=test_user.id)
 
         posts = repo.list_all()
 
@@ -136,9 +134,7 @@ class TestBlogPostRepository:
 
         # Create 5 posts
         for i in range(5):
-            repo.create(
-                title=f"Post {i}", content=f"Content {i}", author_id=test_user.id
-            )
+            repo.create(title=f"Post {i}", content=f"Content {i}", author_id=test_user.id)
 
         posts = repo.list_all(skip=2, limit=2)
 
@@ -150,9 +146,7 @@ class TestBlogPostRepository:
 
         # Create posts for test_user
         for i in range(2):
-            repo.create(
-                title=f"User1 Post {i}", content=f"Content {i}", author_id=test_user.id
-            )
+            repo.create(title=f"User1 Post {i}", content=f"Content {i}", author_id=test_user.id)
 
         # Create post for another_user
         repo.create(title="User2 Post", content="Content", author_id=another_user.id)
@@ -166,9 +160,7 @@ class TestBlogPostRepository:
         """Test creating a blog post."""
         repo = BlogPostRepository(session)
 
-        post = repo.create(
-            title="New Post", content="New Content", author_id=test_user.id
-        )
+        post = repo.create(title="New Post", content="New Content", author_id=test_user.id)
 
         assert post.id is not None
         assert post.title == "New Post"

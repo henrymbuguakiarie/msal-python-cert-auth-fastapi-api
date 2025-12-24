@@ -13,9 +13,7 @@ class ErrorDetail(BaseModel):
 
     code: str = Field(..., description="Error code for programmatic handling")
     message: str = Field(..., description="Human-readable error message")
-    field: str | None = Field(
-        None, description="Field that caused the error (if applicable)"
-    )
+    field: str | None = Field(None, description="Field that caused the error (if applicable)")
     details: dict[str, Any] | None = Field(None, description="Additional error context")
 
 
@@ -28,13 +26,9 @@ class ErrorResponse(BaseModel):
     error: str = Field(..., description="Error type or category")
     message: str = Field(..., description="Human-readable error description")
     status_code: int = Field(..., description="HTTP status code")
-    timestamp: datetime = Field(
-        default_factory=datetime.utcnow, description="When error occurred"
-    )
+    timestamp: datetime = Field(default_factory=datetime.utcnow, description="When error occurred")
     path: str | None = Field(None, description="Request path that caused error")
-    correlation_id: str | None = Field(
-        None, description="Request correlation ID for tracing"
-    )
+    correlation_id: str | None = Field(None, description="Request correlation ID for tracing")
     errors: list[ErrorDetail] | None = Field(
         None, description="Detailed error list (for validation errors)"
     )
@@ -68,9 +62,7 @@ class SuccessResponse(BaseModel, Generic[T]):
     success: bool = Field(True, description="Indicates successful operation")
     data: T = Field(..., description="Response data")
     message: str | None = Field(None, description="Optional success message")
-    timestamp: datetime = Field(
-        default_factory=datetime.utcnow, description="Response timestamp"
-    )
+    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Response timestamp")
 
     class Config:
         json_schema_extra = {
@@ -195,9 +187,7 @@ class UpdatedResponse(BaseModel, Generic[T]):
     success: bool = Field(True, description="Update successful")
     data: T = Field(..., description="Updated resource")
     message: str = Field("Resource updated successfully", description="Success message")
-    changes: list[str] | None = Field(
-        None, description="List of fields that were modified"
-    )
+    changes: list[str] | None = Field(None, description="List of fields that were modified")
 
     class Config:
         json_schema_extra = {
@@ -213,17 +203,11 @@ class UpdatedResponse(BaseModel, Generic[T]):
 class HealthCheckResponse(BaseModel):
     """Health check response model."""
 
-    status: str = Field(
-        ..., description="Overall health status (healthy/degraded/unhealthy)"
-    )
+    status: str = Field(..., description="Overall health status (healthy/degraded/unhealthy)")
     version: str = Field(..., description="API version")
-    timestamp: datetime = Field(
-        default_factory=datetime.utcnow, description="Check timestamp"
-    )
+    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Check timestamp")
     environment: str = Field(..., description="Current environment")
-    checks: dict[str, dict[str, Any]] = Field(
-        ..., description="Component-specific health checks"
-    )
+    checks: dict[str, dict[str, Any]] = Field(..., description="Component-specific health checks")
 
     class Config:
         json_schema_extra = {

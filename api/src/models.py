@@ -57,12 +57,8 @@ class BlogPost(SQLModel, table=True):
 
 
 # Define relationships after both models are defined
-User.posts = Relationship(
-    back_populates="author", sa_relationship_kwargs={"lazy": "select"}
-)
-BlogPost.author = Relationship(
-    back_populates="posts", sa_relationship_kwargs={"lazy": "select"}
-)
+User.posts = Relationship(back_populates="author", sa_relationship_kwargs={"lazy": "select"})
+BlogPost.author = Relationship(back_populates="posts", sa_relationship_kwargs={"lazy": "select"})
 
 
 # API Schemas (Pydantic)
@@ -105,9 +101,7 @@ class BlogPostCreate(BlogPostBase):
 class BlogPostUpdate(BaseModel):
     """Schema for updating a blog post."""
 
-    title: str | None = Field(
-        None, min_length=1, max_length=200, description="Post title"
-    )
+    title: str | None = Field(None, min_length=1, max_length=200, description="Post title")
     content: str | None = Field(None, min_length=1, description="Post content")
 
 

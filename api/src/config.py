@@ -89,9 +89,7 @@ class Settings(BaseSettings):
         """
         if self.jwks_uri:
             return self.jwks_uri
-        return (
-            f"https://login.microsoftonline.com/{self.tenant_id}/" "discovery/v2.0/keys"
-        )
+        return f"https://login.microsoftonline.com/{self.tenant_id}/" "discovery/v2.0/keys"
 
     @property
     def token_issuer(self) -> str:
