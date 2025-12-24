@@ -14,11 +14,7 @@ from .config import get_settings
 from .database import create_db_and_tables
 from .exceptions import APIException
 from .health import router as health_router
-from .middleware import (
-    CorrelationIdMiddleware,
-    RequestLoggingMiddleware,
-    SecurityHeadersMiddleware,
-)
+from .middleware import CorrelationIdMiddleware, RequestLoggingMiddleware, SecurityHeadersMiddleware
 from .rate_limit import RateLimitMiddleware
 from .routes import posts_router, profile_router, users_router
 

@@ -9,14 +9,7 @@ import logging
 from sqlmodel import Session
 
 from .exceptions import AuthorizationError
-from .models import (
-    BlogPost,
-    BlogPostCreate,
-    BlogPostUpdate,
-    ProfileResponse,
-    User,
-    UserCreate,
-)
+from .models import BlogPost, BlogPostCreate, BlogPostUpdate, ProfileResponse, User, UserCreate
 from .repositories import BlogPostRepository, UserRepository
 
 logger = logging.getLogger(__name__)
