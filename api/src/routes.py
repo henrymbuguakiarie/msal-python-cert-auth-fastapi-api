@@ -1,4 +1,5 @@
 """API route handlers."""
+
 import logging
 from typing import Any
 
@@ -38,11 +39,11 @@ async def get_profile(
     session: Session = Depends(get_session),
 ) -> ProfileResponse:
     """Get current user's profile from token claims.
-    
+
     Args:
         claims: JWT token claims
         session: Database session
-        
+
     Returns:
         User profile information
     """
@@ -64,22 +65,22 @@ async def register_user(
     session: Session = Depends(get_session),
 ) -> UserResponse:
     """Register or retrieve current user.
-    
+
     Args:
         user_oid: User's Microsoft Entra ID object ID
         claims: JWT token claims
         session: Database session
-        
+
     Returns:
         User information
     """
     service = UserService(session)
     display_name = claims.get("name")
     user, created = service.get_or_create_user(user_oid, display_name)
-    
+
     if created:
         logger.info(f"Registered new user: {user_oid}")
-    
+
     return UserResponse.model_validate(user)
 
 
@@ -97,12 +98,12 @@ async def create_post(
     session: Session = Depends(get_session),
 ) -> BlogPostResponse:
     """Create a new blog post.
-    
+
     Args:
         post_data: Blog post creation data
         user_oid: Current user's object ID
         session: Database session
-        
+
     Returns:
         Created blog post
     """
@@ -116,8 +117,8 @@ async def create_post(
         logger.error(f"Error creating post: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create post"
-        )
+            detail="Failed to create post",
+        ) from e
 
 
 @posts_router.get(
@@ -133,41 +134,43 @@ async def list_posts(
     _: dict[str, Any] = Depends(get_current_user),  # Require authentication
 ) -> list[BlogPostDetailResponse]:
     """List all blog posts.
-    
+
     Args:
         skip: Number of records to skip
         limit: Maximum number of records to return
         session: Database session
-        
+
     Returns:
         List of blog posts with author information
     """
     from .repositories import UserRepository
-    
+
     service = BlogPostService(session)
     posts = service.list_posts(skip=skip, limit=limit)
-    
+
     # Manually construct response with author information
     user_repo = UserRepository(session)
     result = []
     for post in posts:
         author = user_repo.get_by_id(post.author_id)
         if author:
-            result.append(BlogPostDetailResponse(
-                id=post.id,
-                title=post.title,
-                content=post.content,
-                author_id=post.author_id,
-                created_at=post.created_at,
-                updated_at=post.updated_at,
-                author=UserResponse(
-                    id=author.id,
-                    oid=author.oid,
-                    display_name=author.display_name,
-                    created_at=author.created_at,
-                    updated_at=author.updated_at
+            result.append(
+                BlogPostDetailResponse(
+                    id=post.id,
+                    title=post.title,
+                    content=post.content,
+                    author_id=post.author_id,
+                    created_at=post.created_at,
+                    updated_at=post.updated_at,
+                    author=UserResponse(
+                        id=author.id,
+                        oid=author.oid,
+                        display_name=author.display_name,
+                        created_at=author.created_at,
+                        updated_at=author.updated_at,
+                    ),
                 )
-            ))
+            )
     return result
 
 
@@ -183,27 +186,27 @@ async def get_post(
     _: dict[str, Any] = Depends(get_current_user),  # Require authentication
 ) -> BlogPostDetailResponse:
     """Get a specific blog post.
-    
+
     Args:
         post_id: Post ID
         session: Database session
-        
+
     Returns:
         Blog post with author information
-        
+
     Raises:
         HTTPException: If post not found
     """
     from .repositories import UserRepository
-    
+
     try:
         service = BlogPostService(session)
         post = service.get_post(post_id)
-        
+
         # Manually construct response with author information
         user_repo = UserRepository(session)
         author = user_repo.get_by_id(post.author_id)
-        
+
         if author:
             return BlogPostDetailResponse(
                 id=post.id,
@@ -217,13 +220,13 @@ async def get_post(
                     oid=author.oid,
                     display_name=author.display_name,
                     created_at=author.created_at,
-                    updated_at=author.updated_at
-                )
+                    updated_at=author.updated_at,
+                ),
             )
         else:
             raise ResourceNotFoundError("Author", post.author_id)
     except ResourceNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message) from e
 
 
 @posts_router.put(
@@ -239,16 +242,16 @@ async def update_post(
     session: Session = Depends(get_session),
 ) -> BlogPostResponse:
     """Update a blog post.
-    
+
     Args:
         post_id: Post ID
         post_data: Update data
         user_oid: Current user's object ID
         session: Database session
-        
+
     Returns:
         Updated blog post
-        
+
     Raises:
         HTTPException: If post not found or user lacks permission
     """
@@ -257,9 +260,9 @@ async def update_post(
         post = service.update_post(post_id, post_data, user_oid)
         return BlogPostResponse.model_validate(post)
     except ResourceNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message) from e
     except AuthorizationError as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=e.message)
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=e.message) from e
 
 
 @posts_router.delete(
@@ -274,12 +277,12 @@ async def delete_post(
     session: Session = Depends(get_session),
 ) -> None:
     """Delete a blog post.
-    
+
     Args:
         post_id: Post ID
         user_oid: Current user's object ID
         session: Database session
-        
+
     Raises:
         HTTPException: If post not found or user lacks permission
     """
@@ -287,6 +290,6 @@ async def delete_post(
         service = BlogPostService(session)
         service.delete_post(post_id, user_oid)
     except ResourceNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message) from e
     except AuthorizationError as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=e.message)
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=e.message) from e

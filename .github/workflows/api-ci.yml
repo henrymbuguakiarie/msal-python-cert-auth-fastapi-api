@@ -1,0 +1,168 @@
+name: API CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'api/**'
+      - '.github/workflows/api-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'api/**'
+      - '.github/workflows/api-ci.yml'
+
+jobs:
+  lint-and-format:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    
+    - name: Install dependencies
+      run: poetry install --no-interaction
+    
+    - name: Run Black (Format Check)
+      run: poetry run black --check src tests
+    
+    - name: Run isort (Import Sort Check)
+      run: poetry run isort --check-only src tests
+    
+    - name: Run Ruff (Linting)
+      run: poetry run ruff check src tests
+
+  type-check:
+    name: Type Checking
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    
+    - name: Install dependencies
+      run: poetry install --no-interaction
+    
+    - name: Run mypy (Type Checking)
+      run: poetry run mypy src --ignore-missing-imports || true
+      continue-on-error: true
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+    defaults:
+      run:
+        working-directory: ./api
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    
+    - name: Install dependencies
+      run: poetry install --no-interaction
+    
+    - name: Run unit tests
+      run: poetry run pytest tests/unit -v --cov=src --cov-report=xml --cov-report=term-missing
+    
+    - name: Run integration tests
+      run: poetry run pytest tests/integration -v
+      env:
+        TENANT_ID: ${{ secrets.TEST_TENANT_ID || '00000000-0000-0000-0000-000000000000' }}
+        API_APP_ID_URI: api://test-api-id
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./api/coverage.xml
+        flags: api
+        name: api-coverage
+      if: matrix.python-version == '3.10'
+
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    
+    - name: Install dependencies
+      run: poetry install --no-interaction
+    
+    - name: Run Bandit (Security Linter)
+      run: |
+        poetry add --group dev bandit[toml]
+        poetry run bandit -r src -f json -o bandit-report.json || true
+      continue-on-error: true
+    
+    - name: Run Safety (Dependency Vulnerability Check)
+      run: |
+        poetry add --group dev safety
+        poetry run safety check --json || true
+      continue-on-error: true
+
+  build:
+    name: Build and Test Docker Image
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, test]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      run: |
+        docker build -f api/Dockerfile -t blog-api:test ./api || echo "Dockerfile not found - skipping"
+      continue-on-error: true

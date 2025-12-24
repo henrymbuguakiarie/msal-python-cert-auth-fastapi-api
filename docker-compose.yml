@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # FastAPI Backend API
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: blog-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - TENANT_ID=${TENANT_ID}
+      - API_APP_ID_URI=${API_APP_ID_URI}
+      - REQUIRED_SCOPE=${REQUIRED_SCOPE:-access_as_user}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-bloguser}:${POSTGRES_PASSWORD:-blogpass}@postgres:5432/${POSTGRES_DB:-blogdb}
+      - LOG_LEVEL=INFO
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:5000,http://localhost:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./api/src:/app/src  # Mount source for hot reload in dev
+    networks:
+      - blog-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: blog-postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-bloguser}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-blogpass}
+      - POSTGRES_DB=${POSTGRES_DB:-blogdb}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./api/scripts/init.sql:/docker-entrypoint-initdb.d/init.sql  # Optional init script
+    networks:
+      - blog-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bloguser} -d ${POSTGRES_DB:-blogdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache (optional - for future enhancements)
+  redis:
+    image: redis:7-alpine
+    container_name: blog-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - blog-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Nginx Reverse Proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: blog-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro  # SSL certificates
+    depends_on:
+      - api
+    networks:
+      - blog-network
+    restart: unless-stopped
+    profiles:
+      - production  # Only start with --profile production
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  blog-network:
+    driver: bridge

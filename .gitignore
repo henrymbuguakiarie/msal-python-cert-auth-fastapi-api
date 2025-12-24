@@ -16,11 +16,15 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+wheels/
+*.egg
 
-# Environment
+# Virtual Environments
 .env
 .venv
 venv/
+ENV/
+env/
 
 # IDE
 .vscode/
@@ -28,7 +32,43 @@ venv/
 *.swp
 *.swo
 *~
+.vs/
+*.sublime-project
+*.sublime-workspace
 
 # OS
 .DS_Store
 Thumbs.db
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+coverage.xml
+*.cover
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Docker
+docker-compose.override.yml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build artifacts
+*.pyc
+.mypy_cache/
+.ruff_cache/
+.eggs/

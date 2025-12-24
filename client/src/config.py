@@ -15,7 +15,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables.
-    
+
     Attributes:
         tenant_id: Microsoft Entra ID tenant ID
         client_id: Application (client) ID from app registration
@@ -39,18 +39,18 @@ class Settings(BaseSettings):
     # Microsoft Entra ID Configuration
     tenant_id: str = Field(..., min_length=36, max_length=36)
     client_id: str = Field(..., min_length=36, max_length=36)
-    
+
     # Certificate Configuration
     client_cert_path: str = Field(...)
     client_cert_thumbprint: str = Field(..., min_length=40, max_length=40)
-    
+
     # OAuth Configuration
     redirect_uri: str = Field(default="http://localhost:5000/callback")
     api_scope: str = Field(...)
-    
+
     # API Configuration
     api_base_url: str = Field(default="http://localhost:8000")
-    
+
     # Flask Configuration
     flask_secret_key: str = Field(default="dev-secret-key-change-in-production")
     flask_port: int = Field(default=5000, ge=1, le=65535)
@@ -102,7 +102,7 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     """Get cached settings instance.
-    
+
     Returns:
         Singleton Settings instance
     """

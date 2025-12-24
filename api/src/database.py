@@ -1,6 +1,7 @@
 """Database connection and session management."""
+
 import logging
-from typing import Generator
+from collections.abc import Generator
 
 from sqlmodel import Session, SQLModel, create_engine
 
@@ -21,7 +22,7 @@ engine = create_engine(
 
 def create_db_and_tables() -> None:
     """Create all database tables.
-    
+
     Should be called at application startup.
     """
     logger.info("Creating database tables")
@@ -30,7 +31,7 @@ def create_db_and_tables() -> None:
 
 def get_session() -> Generator[Session, None, None]:
     """FastAPI dependency for database sessions.
-    
+
     Yields:
         Database session with automatic cleanup
     """

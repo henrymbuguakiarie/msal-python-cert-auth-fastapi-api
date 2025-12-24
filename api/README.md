@@ -37,7 +37,7 @@ api/
 
 ## Prerequisites
 
-- Python 3.10+
+- Python 3.10+ (tested on Python 3.10, 3.11, 3.12, 3.13, 3.14)
 - Poetry for dependency management
 - Microsoft Entra ID tenant with configured app registrations
 

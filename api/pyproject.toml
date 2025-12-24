@@ -17,6 +17,7 @@ pydantic = {extras = ["email"], version = "^2.9.0"}
 pydantic-settings = "^2.6.0"
 python-multipart = "^0.0.12"
 cryptography = "^43.0.0"
+alembic = "^1.13.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.0"
@@ -28,6 +29,8 @@ black = "^24.10.0"
 ruff = "^0.7.0"
 isort = "^5.13.0"
 pre-commit = "^4.0.0"
+mypy = "^1.7.0"
+bandit = {extras = ["toml"], version = "^1.7.0"}
 
 [tool.black]
 line-length = 100
@@ -84,6 +87,10 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
 ]
+
+[tool.bandit]
+exclude_dirs = ["tests", "alembic/versions"]
+skips = ["B101"]  # Skip assert_used in tests
 
 [build-system]
 requires = ["poetry-core"]

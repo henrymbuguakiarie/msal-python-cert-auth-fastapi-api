@@ -13,7 +13,7 @@ from src.config import Settings
 @pytest.fixture
 def mock_settings() -> Settings:
     """Create mock settings for testing.
-    
+
     Returns:
         Settings instance with test values
     """
@@ -49,7 +49,7 @@ def mock_settings() -> Settings:
 @pytest.fixture
 def mock_msal_app() -> MagicMock:
     """Create a mock MSAL application.
-    
+
     Returns:
         Mock MSAL ConfidentialClientApplication
     """
@@ -78,7 +78,7 @@ def mock_msal_app() -> MagicMock:
 @pytest.fixture
 def sample_token_response() -> dict:
     """Sample token response from MSAL.
-    
+
     Returns:
         Dictionary with token response data
     """
@@ -104,7 +104,7 @@ def sample_token_response() -> dict:
 @pytest.fixture
 def sample_user_response() -> dict:
     """Sample user profile response from API.
-    
+
     Returns:
         Dictionary with user data
     """
@@ -120,7 +120,7 @@ def sample_user_response() -> dict:
 @pytest.fixture
 def sample_post_response() -> dict:
     """Sample blog post response from API.
-    
+
     Returns:
         Dictionary with blog post data
     """
@@ -137,7 +137,7 @@ def sample_post_response() -> dict:
 @pytest.fixture
 def sample_posts_list() -> dict:
     """Sample paginated posts response from API.
-    
+
     Returns:
         Dictionary with paginated posts data
     """
